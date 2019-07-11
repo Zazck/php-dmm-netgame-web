@@ -1,0 +1,43 @@
+<h1 mat-dialog-title>完善用户资料</h1>
+<div mat-dialog-content>
+  <form #installForm="ngForm">
+    <mat-form-field class="full-width">
+      <input [(ngModel)]="nickname" name="nickname" matInput placeholder="昵称" type="text" autocomplete="nickname">
+      <button mat-button matSuffix mat-icon-button aria-label="随机" (click)="randomNickname()">
+        <svg style="width:1em;height:24px" viewBox="0 0 24 24">
+          <path fill="#000000" d="M5,3H19A2,2 0 0,1 21,5V19A2,2 0 0,1 19,21H5A2,2 0 0,1 3,19V5A2,2 0 0,1 5,3M12,10A2,2 0 0,0 10,12A2,2 0 0,0 12,14A2,2 0 0,0 14,12A2,2 0 0,0 12,10M7,5A2,2 0 0,0 5,7A2,2 0 0,0 7,9A2,2 0 0,0 9,7A2,2 0 0,0 7,5M17,15A2,2 0 0,0 15,17A2,2 0 0,0 17,19A2,2 0 0,0 19,17A2,2 0 0,0 17,15Z" />
+        </svg>
+      </button>
+    </mat-form-field>
+    <div class="radio-wrapper">
+      <mat-radio-group [(ngModel)]="gender" name="gender" aria-label="性别">
+        <mat-radio-button class="radio-button" value="male">男性</mat-radio-button>
+        <mat-radio-button class="radio-button" value="female">女性</mat-radio-button>
+      </mat-radio-group>
+    </div>
+    <div>
+      <mat-form-field>
+        <input matInput [min]="minDate" [max]="maxDate" [matDatepicker]="picker" placeholder="出生日期" [value]="birthday"  (dateChange)="birthday = $event.value">
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
+    </div>
+    <div class="checkbox-wrapper">
+      <mat-checkbox [(ngModel)]="isGeneralChecked" name="isGeneralChecked">订阅DMM GAMES邮件杂志</mat-checkbox>
+    </div>
+    <div class="checkbox-wrapper">
+      <mat-checkbox [(ngModel)]="isAdultChecked" name="isAdultChecked">订阅DMM GAMES成人向邮件杂志</mat-checkbox>
+    </div>
+  </form>
+</div>
+<div mat-dialog-actions class="dialog-actions">
+  <button color="primary" mat-button (click)="back()">返回</button>
+  <button color="primary" mat-button (click)="regist()" [disabled]="requesting" cdkFocusInitial>
+    <ng-container *ngIf="requesting; else elseTemplate">
+      <mat-spinner diameter="24"></mat-spinner>
+    </ng-container>
+    <ng-template #elseTemplate>
+      确定
+    </ng-template>
+  </button>
+</div>

@@ -1,0 +1,106 @@
+/* You can add global styles to this file, and also import other style files */
+@import '~@angular/material/theming'
+
+
+// Include non-theme styles for core.
+@include mat-core()
+
+// Define a theme.
+$primary: mat-palette($mat-deep-purple, A700)
+$accent:  mat-palette($mat-teal, 600, 500, 700)
+
+$theme: mat-light-theme($primary, $accent)
+
+$background: map-get($theme, background)
+$foreground: map-get($theme, foreground)
+
+// Include all theme styles for the components.
+@include angular-material-theme($theme)
+.mat-sidenav-header
+  flex-shrink: 0
+  box-sizing: border-box
+  min-height: 64px
+  padding: 0 16px 4px
+  .mat-sidenav-title
+    margin-top: 0
+    font-size: 1.25rem
+    font-weight: 500
+    line-height: 2rem
+    margin-bottom: -20px
+    &::before
+      display: inline-block
+      width: 0
+      height: 36px
+      content: ""
+      vertical-align: 0
+    &::after
+      display: inline-block
+      width: 0
+      height: 20px
+      content: ""
+      vertical-align: -20px
+  .mat-sidenav-subtitle
+    font-size: .875rem
+    line-height: 1.25rem
+    font-weight: 400
+    margin: 0
+    color: rgba(mat-color($foreground, text),.6)
+    &::before
+      display: inline-block
+      width: 0
+      height: 20px
+      content: ""
+      vertical-align: 0
+
+.mat-nav-list
+  .mat-list-item.active
+    color: rgba(mat-color($primary), 0.87)
+    background-color: rgba(mat-color($primary), 0.12)
+    &:focus
+      background-color: rgba(mat-color($primary), 0.24)
+
+.mat-drawer-backdrop.mat-drawer-shown
+  $opacity: 0.32
+  $backdrop-color: mat-color($background, card, $opacity)
+  @if (type-of($backdrop-color) == color)
+    // We use invert() here to have the darken the background color expected to be used. If the
+    // background is light, we use a dark backdrop. If the background is dark,
+    // we use a light backdrop.
+    background-color: invert($backdrop-color)
+  @else
+    // If we couldn't resolve the backdrop color to a color value, fall back to using
+    // `opacity` to make it opaque since its end value could be a solid color.
+    background-color: $backdrop-color
+    opacity: $opacity
+.mat-tab-label-active
+  color: mat-color($primary)
+
+.mat-simple-snackbar-action
+  color: mat-color($primary, 300)
+
+.mat-tab-label, .mat-tab-link
+  &.mat-tab-label-active
+    opacity: 1
+
+.mat-tab-body
+  > .mat-tab-body-content
+    overflow: hidden
+
+.mat-theme-surface-primary
+  background: mat-color($background, card)
+
+button[disabled]
+  .mat-progress-spinner, .mat-spinner
+    margin: 0 auto
+    circle
+      stroke: mat-color($foreground, disabled-text)
+
+html, body
+  margin: 0
+  height: 100%
+
+.spacer
+  flex: 1 1 auto
+
+.svg-icon
+  fill: currentColor

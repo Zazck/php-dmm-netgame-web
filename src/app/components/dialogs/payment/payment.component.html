@@ -1,0 +1,43 @@
+<h1 mat-dialog-title>确认购买 | {{ detail.gameTitle }}</h1>
+<div class="item-info">
+  <img [src]="detail.itemImage | safeResourceUrl" width="180" height="180">
+  <h2>{{ detail.itemTitle }}</h2>
+  <p>{{ detail.itemDescription }}</p>
+</div>
+<div class="payment-detail">
+  <table>
+    <tbody>
+      <tr>
+        <td>单价</td>
+        <td>{{ detail.itemPrice | number:'1.0-0' }}pt</td>
+      </tr>
+      <tr>
+        <td>数量</td>
+        <td>{{ detail.itemCount }}</td>
+      </tr>
+      <tr>
+        <td>总价</td>
+        <td>{{ detail.itemPrice * detail.itemCount | number:'1.0-0' }}pt</td>
+      </tr>
+      <tr>
+        <td>持有点数</td>
+        <td>{{ detail.point | number:'1.0-0' }}pt</td>
+      </tr>
+      <tr>
+        <td>结算点数</td>
+        <td>{{ detail.point - detail.itemPrice * detail.itemCount | number:'1.0-0' }}pt</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<div mat-dialog-actions class="dialog-actions">
+  <button color="primary" mat-button (click)="cancel()" [disabled]="requesting">取消</button>
+  <button
+    color="primary"
+    mat-button
+    (click)="commit()"
+    [disabled]="requesting || detail.itemPrice * detail.itemCount > detail.point"
+    cdkFocusInitial>
+    {{ (detail.itemPrice * detail.itemCount > detail.point) ?  "点数不足" : "确定" }}
+  </button>
+</div>

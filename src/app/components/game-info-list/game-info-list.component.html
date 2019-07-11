@@ -1,0 +1,15 @@
+<div class="game-list-body">
+  <ul>
+    <li *ngFor="let info of list">
+      <div class="mat-elevation-z2">
+        <a matRipple href="javascript:void(0);" [routerLink]="[ '/play' ]" [queryParams]="getQueryParamsFrom(info)" class="game-info mat-theme-surface-primary">
+          <div class="game-info-thumb" [ngStyle]="getThumb(info)"></div>
+          <div class="game-info-content">
+            <h2>{{info.title}}</h2>
+            <h3>{{info.comment}}</h3>
+          </div>
+        </a>
+      </div>
+    </li>
+  </ul>
+</div>

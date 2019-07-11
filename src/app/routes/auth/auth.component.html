@@ -1,0 +1,41 @@
+<div class="login-category-selection">
+  <div mat-tab-nav-bar mat-align-tabs="center">
+    <span mat-tab-link (click)="category = 0" [active]="category === 0">
+      <mat-icon class="tab-icon">local_florist</mat-icon>
+      全年龄
+    </span>
+    <span mat-tab-link (click)="category = 1" [active]="category === 1">
+      <mat-icon class="tab-icon">local_bar</mat-icon>
+      成人向
+    </span>
+  </div>
+  <form #loginForm="ngForm">
+    <div class="login-input-box mat-elevation-z2">
+      <mat-form-field class="full-width">
+        <input [(ngModel)]="loginPayload.loginID" name="login_id" matInput placeholder="DMM 用户邮箱" type="text" autocomplete="username">
+      </mat-form-field>
+      <mat-form-field class="full-width">
+        <input [(ngModel)]="loginPayload.password" name="password" matInput placeholder="DMM 用户密码" type="password" autocomplete="current-password">
+      </mat-form-field>
+      <ul class="login-options">
+        <li>
+          <mat-checkbox [(ngModel)]="loginPayload.saveLoginID" name="save_login_id">记住账号</mat-checkbox>
+        </li>
+        <li>
+          <mat-checkbox [(ngModel)]="loginPayload.savePassword" name="save_password">记住密码</mat-checkbox>
+        </li>
+        <li>
+          <mat-checkbox [(ngModel)]="loginPayload.autoLogin" name="use_auto_login">自动登录</mat-checkbox>
+        </li>
+      </ul>
+    </div>
+    <button class="login-action-button" mat-raised-button color="primary" (click)="login()" [disabled]="requesting">
+      <ng-container *ngIf="requesting; else elseTemplate">
+        <mat-spinner diameter="24"></mat-spinner>
+      </ng-container>
+      <ng-template #elseTemplate>
+        登录
+      </ng-template>
+    </button>
+  </form>
+</div>

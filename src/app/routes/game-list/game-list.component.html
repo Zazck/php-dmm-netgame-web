@@ -1,0 +1,20 @@
+
+<ng-container *ngIf="category; else elseTemplate">
+  <mat-tab-group class="no-list-overflow" mat-align-tabs="center">
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">local_florist</mat-icon> 全年龄
+      </ng-template>
+      <app-game-info-list class="game-list-body" [list]="generalList" category="general"></app-game-info-list>
+    </mat-tab>
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">local_bar</mat-icon> 成人向
+      </ng-template>
+      <app-game-info-list class="game-list-body" [list]="adultList" category="adult"></app-game-info-list>
+    </mat-tab>
+  </mat-tab-group>
+</ng-container>
+<ng-template #elseTemplate>
+  <app-game-info-list class="game-list-body" [list]="generalList" category="general"></app-game-info-list>
+</ng-template>

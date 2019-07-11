@@ -1,0 +1,22 @@
+<h1 mat-dialog-title>安装游戏到账户</h1>
+<div mat-dialog-content>
+  <form #installForm="ngForm">
+    <div class="checkbox-wrapper">
+      <mat-checkbox [(ngModel)]="notification" name="notification">接收消息提醒</mat-checkbox>
+    </div>
+    <div class="checkbox-wrapper">
+      <mat-checkbox [(ngModel)]="myapp" name="myapp">在个人资料里显示这个应用</mat-checkbox>
+    </div>
+  </form>
+</div>
+<div mat-dialog-actions class="dialog-actions">
+  <button color="primary" mat-button (click)="back()">返回</button>
+  <button color="primary" mat-button (click)="install()" [disabled]="requesting" cdkFocusInitial>
+    <ng-container *ngIf="requesting; else elseTemplate">
+      <mat-spinner diameter="24"></mat-spinner>
+    </ng-container>
+    <ng-template #elseTemplate>
+      安装
+    </ng-template>
+  </button>
+</div>

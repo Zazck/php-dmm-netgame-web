@@ -1,0 +1,46 @@
+.game-list-body
+  > ul
+    list-style: none
+    padding: 0
+    margin: 12px
+    display: grid
+    grid-template-columns: repeat(auto-fill, 600px)
+    gap: 12px
+    justify-content: center
+    > li
+      width: 600px
+  .game-info
+    display: flex
+    flex-direction: row
+    outline: none
+    color: inherit
+    text-decoration: none
+    cursor: pointer
+    &::before
+      transition: opacity 0.2s ease
+      position: absolute
+      width: 100%
+      height: 100%
+      background-color: #000
+      content: ''
+      opacity: 0
+    &:hover
+      &::before
+        opacity: .04
+    .game-info-content
+      display: flex
+      flex-direction: column
+      justify-content: space-evenly
+      h2
+        font-size: 1.25rem
+        font-weight: 500
+        margin: 0 12px
+        line-height: 2rem
+      h3
+        font-weight: 400
+        font-size: .875rem
+        margin: 0 12px
+        line-height: 2rem
+  .game-info-thumb
+    width: 164px
+    height: 90px

@@ -1,0 +1,4 @@
+<div class="settings-body">
+  <div><mat-slide-toggle [checked]="setting.autoRedirect" (change)="changeSetting('autoRedirect', $event)">自动跳转到OSAPI框架页</mat-slide-toggle></div>
+  <div><button color="primary" mat-raised-button (click)="setting.cookies = []">清除Cookies</button></div>
+</div>

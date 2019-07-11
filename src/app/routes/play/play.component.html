@@ -1,0 +1,3 @@
+<div class="game-container" class.bind="loading ? 'loading' : ''">
+  <iframe id="game-frame" class="game-frame" *ngIf="osapi" [src]="osapi | safeResourceUrl" [width]="iframeWidth" [height]="iframeHeight" scrolling="no" allowfullscreen='true'></iframe>
+</div>
