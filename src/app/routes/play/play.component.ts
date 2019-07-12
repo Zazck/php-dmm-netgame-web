@@ -32,6 +32,7 @@ export class PlayComponent implements OnInit {
   public rpcToken: string = '';
   public readonly newTransactionHost = 'pc-play.games.dmm.com';
   public readonly oldTransactionHost = 'www.dmm.com';
+  public pure: boolean = false;
 
   constructor(
     private dialog: MatDialog,
@@ -41,13 +42,13 @@ export class PlayComponent implements OnInit {
     private activatedRoute: ActivatedRoute,
   ) { }
 
-  public get frameWindow() {
-    const frame: HTMLIFrameElement = <HTMLIFrameElement>window.document.getElementById('game-frame');
-    return frame ? frame.contentWindow : null;
+  public get frame() {
+    const frame: HTMLIFrameElement = <HTMLIFrameElement>window.document.getElementById('game_frame');
+    return frame || null;
   }
 
   public rpcMessage<T extends any[]>(event: string, ...data: T) {
-    this.frameWindow.postMessage(
+    this.frame.contentWindow.postMessage(
       JSON.stringify(<IRPCPayloadRaw<T>>{
         s: event,
         a: data,
@@ -112,6 +113,14 @@ export class PlayComponent implements OnInit {
           this.gadgetInfo = (<IResponseData<IResponseGameFrame>>response).data.gadget_info;
           this.gadgetInfo.st = decodeURIComponent(this.gadgetInfo.st);
           this.osapi = this.handleOsapi(this.gadgetInfo.url);
+          // dirty fix for POI
+          if ('align' in window) {
+            this.pure = true;
+            // quick-dirty fix for kancolle
+            if (this.name === 'kancolle') {
+              setTimeout(() => this.frame.style.top = '-16px', 0);
+            }
+          }
           if (this.setting.autoRedirect) {
             this.setting.game = null;
             this.setting.gameCategory = null;
