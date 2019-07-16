@@ -24,6 +24,7 @@ export class DmmService {
     '-20': '需要完善账号信息',
     '-100': '浏览器与服务器通信失败',
     '-101': '丢失了登录凭据, 需重新登录',
+    '-110': '登录器服务端回报了无效的数据',
   };
   private readonly url = 'http://zazck.s1001.xrea.com/services/1562817725000/api.php';
   public emiter = new EventEmitter<string>();
@@ -51,7 +52,7 @@ export class DmmService {
   private async request<T>(input: RequestInfo, init?: RequestInit): Promise<IResponseData<T> | IResponseError | IResponseMessage> {
     const response: Response | null = await fetch(input, init)
       .catch(() => {
-        this.emiter.emit(this.responseText[-100]);
+        this.emiter.emit(this.responseText[OpCode.CLIENT_NETWORK_ERROR]);
         return null;
       });
     if (!response) {
@@ -61,7 +62,18 @@ export class DmmService {
         cookies: [],
       };
     }
-    const result: IResponseData<T> | IResponseError | IResponseMessage = await response.json();
+    const result: IResponseData<T> | IResponseError | IResponseMessage | null = await response.json()
+      .catch(() => {
+        this.emiter.emit(this.responseText[OpCode.SERVER_INVALID_RESPONSE]);
+        return null;
+      });
+    if (!result) {
+      return <IResponseError>{
+        code: OpCode.SERVER_INVALID_RESPONSE,
+        data: this.responseText[OpCode.SERVER_INVALID_RESPONSE],
+        cookies: [],
+      };
+    }
     if (result.cookies) {
       this.setting.cookies = result.cookies;
     }

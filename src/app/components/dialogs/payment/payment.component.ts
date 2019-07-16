@@ -1,5 +1,5 @@
 import { Component, OnInit, Inject } from '@angular/core';
-import { IResponsePaymentDetail, IRequestPaymentPayload, IPaymentCancelPayload } from 'src/app/types/dmm';
+import { IResponsePaymentDetail, IRequestPaymentPayload, IPaymentCancelPayload, IResponseData, IResponsePaymentAction, IResponseError } from 'src/app/types/dmm';
 import { Router } from '@angular/router';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { DmmService } from 'src/app/services/dmm.service';
@@ -31,16 +31,24 @@ export class PaymentComponent implements OnInit {
 
   public async commit() {
     this.requesting = true;
-    const result = await this.dmm.paymentCommit(this.paymentPayload);
-    this.requesting = false;
-    this.dialogRef.close(result);
+    const result: IResponseData<IResponsePaymentAction> | IResponseError | null = await this.dmm.paymentCommit(this.paymentPayload).catch(() => {
+      this.requesting = false;
+      return null;
+    });
+    if (result !== null) {
+      this.dialogRef.close(result);
+    }
   }
 
   public async cancel() {
     this.requesting = true;
-    const result = await this.dmm.paymentCancel(this.paymentPayload);
-    this.requesting = false;
-    this.dialogRef.close(result);
+    const result: IResponseData<IResponsePaymentAction> | IResponseError | null = await this.dmm.paymentCancel(this.paymentPayload).catch(() => {
+      this.requesting = false;
+      return null;
+    });
+    if (result !== null) {
+      this.dialogRef.close(result);
+    }
   }
 
 }

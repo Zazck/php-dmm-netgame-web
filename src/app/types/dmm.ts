@@ -15,6 +15,7 @@ export enum OpCode {
   DMM_REQUIRE_PROFILE = -20,
   CLIENT_NETWORK_ERROR = -100,
   CLIENT_COOKIES_LOST = -101,
+  SERVER_INVALID_RESPONSE = -110,
 }
 
 export interface ILoginPayload {

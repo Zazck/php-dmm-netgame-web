@@ -21,9 +21,9 @@ export class AuthComponent implements OnInit {
   public category: 0 | 1 = this.setting.category === 'exchange' ? 1 : 0;
   public requesting: boolean = false;
   constructor(
-    private setting: SettingService,
-    private dmm: DmmService,
-    private router: Router,
+    public setting: SettingService,
+    public dmm: DmmService,
+    public router: Router,
   ) { }
 
   ngOnInit() {
@@ -45,5 +45,10 @@ export class AuthComponent implements OnInit {
     if (result.code === OpCode.OK) {
       this.router.navigate(['/game-list']);
     }
+  }
+  public async logout() {
+    this.requesting = true;
+    const result = await this.dmm.logout();
+    this.requesting = false;
   }
 }

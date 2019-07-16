@@ -240,6 +240,7 @@ export class PlayComponent implements OnInit {
     };
     const result = await this.dmm.requestPayment(paymentPayload);
     if (result.code !== OpCode.OK) {
+      this.rpcMessage('dmm.requestPaymentCallback', 500, result.data);
       return;
     }
     const paymentDialog = this.dialog.open(PaymentComponent, {
