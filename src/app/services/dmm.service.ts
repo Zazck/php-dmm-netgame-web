@@ -82,6 +82,7 @@ export class DmmService {
       return result;
     }
     if (result.code === OpCode.DMM_TOKEN_EXPIRED) {
+      this.setting.cookies = [];
       this.setting.authenticated = false;
     }
     return result;

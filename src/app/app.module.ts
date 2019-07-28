@@ -7,7 +7,6 @@ import {
   MatButtonModule,
   MatCheckboxModule,
   MatDatepickerModule,
-  MatCardModule,
   MatTabsModule,
   MatRadioModule,
   MatDialogModule,
