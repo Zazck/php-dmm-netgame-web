@@ -122,7 +122,7 @@ export interface IResponsePaymentAction {
   payment_id: string;
 }
 
-interface IPaymentPayload {
+export interface IPaymentPayload {
   app_name: string;
   app_base: string;
   app_id: number;
@@ -143,10 +143,6 @@ export interface IRPCPayload<T extends any[] = any[]> {
   event: string;
   data: T;
 }
-
-export interface IRequestPaymentPayload extends IPaymentPayload {}
-export interface IPaymentCommitPayload extends IPaymentPayload {}
-export interface IPaymentCancelPayload extends IPaymentPayload {}
 
 export interface IRPCRequestPaymentPayload {
   orderedTime: string;

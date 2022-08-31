@@ -1,6 +1,7 @@
 import { SettingService } from './setting.service';
 import { Injectable, EventEmitter } from '@angular/core';
-import { IResponseError, OpCode, IResponseData, IResponseMessage, ILoginPayload, IResponseST, IUpdateSTPayload, IResponseGameFrame, IRunPayload, IInstallPayload, IRegistPayload, IResponsePaymentDetail, IRequestPaymentPayload, IResponsePaymentAction } from '../types/dmm';
+import { IResponseError, OpCode, IResponseData, IResponseMessage, ILoginPayload, IResponseST, IUpdateSTPayload, IResponseGameFrame, IRunPayload, IInstallPayload, IRegistPayload, IResponsePaymentDetail, IPaymentPayload, IResponsePaymentAction } from '../types/dmm';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root',
@@ -30,6 +31,7 @@ export class DmmService {
   public emiter = new EventEmitter<string>();
   constructor(
     private setting: SettingService,
+    private http: HttpClient,
   ) { }
 
   private createFormData(input?: object) {
@@ -50,6 +52,45 @@ export class DmmService {
   }
 
   private async request<T>(input: RequestInfo, init?: RequestInit): Promise<IResponseData<T> | IResponseError | IResponseMessage> {
+    const response: Response | null = await fetch(input, init)
+      .catch(() => {
+        this.emiter.emit(this.responseText[OpCode.CLIENT_NETWORK_ERROR]);
+        return null;
+      });
+    if (!response) {
+      return <IResponseError>{
+        code: OpCode.CLIENT_NETWORK_ERROR,
+        data: this.responseText[OpCode.CLIENT_NETWORK_ERROR],
+        cookies: [],
+      };
+    }
+    const result: IResponseData<T> | IResponseError | IResponseMessage | null = await response.json()
+      .catch(() => {
+        this.emiter.emit(this.responseText[OpCode.SERVER_INVALID_RESPONSE]);
+        return null;
+      });
+    if (!result) {
+      return <IResponseError>{
+        code: OpCode.SERVER_INVALID_RESPONSE,
+        data: this.responseText[OpCode.SERVER_INVALID_RESPONSE],
+        cookies: [],
+      };
+    }
+    if (result.cookies) {
+      this.setting.cookies = result.cookies;
+    }
+    this.emiter.emit(this.responseText[result.code]);
+    if (result.code === OpCode.OK) {
+      return result;
+    }
+    if (result.code === OpCode.DMM_TOKEN_EXPIRED) {
+      this.setting.cookies = [];
+      this.setting.authenticated = false;
+    }
+    return result;
+  }
+
+  private async requestDeprecated<T>(input: RequestInfo, init?: RequestInit): Promise<IResponseData<T> | IResponseError | IResponseMessage> {
     const response: Response | null = await fetch(input, init)
       .catch(() => {
         this.emiter.emit(this.responseText[OpCode.CLIENT_NETWORK_ERROR]);
@@ -182,7 +223,7 @@ export class DmmService {
     });
   }
 
-  public async requestPayment(payload: IRequestPaymentPayload): Promise<IResponseData<IResponsePaymentDetail> | IResponseError> {
+  public async requestPayment(payload: IPaymentPayload): Promise<IResponseData<IResponsePaymentDetail> | IResponseError> {
     if (!this.setting.cookies) {
       return;
     }
@@ -194,7 +235,7 @@ export class DmmService {
     });
   }
 
-  public async paymentCommit(payload: IRequestPaymentPayload): Promise<IResponseData<IResponsePaymentAction> | IResponseError> {
+  public async paymentCommit(payload: IPaymentPayload): Promise<IResponseData<IResponsePaymentAction> | IResponseError> {
     if (!this.setting.cookies) {
       return;
     }
@@ -206,7 +247,7 @@ export class DmmService {
     });
   }
 
-  public async paymentCancel(payload: IRequestPaymentPayload): Promise<IResponseData<IResponsePaymentAction> | IResponseError> {
+  public async paymentCancel(payload: IPaymentPayload): Promise<IResponseData<IResponsePaymentAction> | IResponseError> {
     if (!this.setting.cookies) {
       return;
     }

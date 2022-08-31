@@ -1,9 +1,8 @@
 import { UpdateStComponent } from './../../components/dialogs/update-st/update-st.component';
 import { PaymentComponent } from './../../components/dialogs/payment/payment.component';
-import { DomSanitizer } from '@angular/platform-browser';
 import { SettingService } from './../../services/setting.service';
-import { OpCode, IResponseData, IResponseGameFrame, IInstallPayload, IResponseError, IRPCPayloadRaw, IRPCPayload, IRPCRequestPaymentPayload, IRequestPaymentPayload, IPaymentCancelPayload, IResponsePaymentAction } from './../../types/dmm';
-import { Component, OnInit, SecurityContext } from '@angular/core';
+import { OpCode, IResponseData, IResponseGameFrame, IInstallPayload, IResponseError, IRPCPayloadRaw, IRPCPayload, IRPCRequestPaymentPayload, IPaymentPayload, IResponsePaymentAction } from './../../types/dmm';
+import { Component, OnInit } from '@angular/core';
 import { IGadgetInfo, IRunPayload } from 'src/app/types/dmm';
 import { MatDialog } from '@angular/material';
 import { InstallComponent } from 'src/app/components/dialogs/install/install.component';
@@ -17,22 +16,21 @@ import { RegistComponent } from 'src/app/components/dialogs/regist/regist.compon
   styleUrls: ['./play.component.sass'],
 })
 export class PlayComponent implements OnInit {
-  public osapi: string = '';
-  public frameOrigin: string = '';
   public iframeWidth: number = 1200;
   public iframeHeight: number = 1200;
-  public category: 'general' | 'adult';
-  public name: string = '';
-  public notification: boolean = true;
-  public myapp: boolean = true;
   public loading: boolean = false;
-  public installation: boolean = false;
-  public updateStTimer: number = null;
-  public gadgetInfo: IGadgetInfo = {} as IGadgetInfo;
-  public rpcToken: string = '';
-  public readonly newTransactionHost = 'pc-play.games.dmm.com';
-  public readonly oldTransactionHost = 'www.dmm.com';
   public pure: boolean = false;
+  private osapi: string = '';
+  private frameOrigin: string = '';
+  private category: 'general' | 'adult';
+  private name: string = '';
+  private notification: boolean = true;
+  private myapp: boolean = true;
+  private updateStTimer: number = null;
+  private gadgetInfo: IGadgetInfo = {} as IGadgetInfo;
+  private rpcToken: string = '';
+  private readonly newTransactionHost = 'pc-play.games.dmm.com';
+  private readonly oldTransactionHost = 'www.dmm.com';
 
   constructor(
     private dialog: MatDialog,
@@ -87,11 +85,11 @@ export class PlayComponent implements OnInit {
     });
     if (result.code !== OpCode.OK || result.data.status !== 'ok') {
       clearInterval(this.updateStTimer);
-      const installDialog = this.dialog.open(UpdateStComponent, {
+      const dialog = this.dialog.open(UpdateStComponent, {
         disableClose: true,
         data: null,
       });
-      installDialog.afterClosed().subscribe((result: boolean | null) => {
+      dialog.afterClosed().subscribe((result: boolean | null) => {
         if (result) {
           this.osapi = '';
           this.run();
@@ -106,7 +104,7 @@ export class PlayComponent implements OnInit {
     this.rpcMessage('update_security_token', this.gadgetInfo.st);
   }
 
-  public async handleResponse(response: any) {
+  public handleResponse = (response: any) => {
     switch (response.code) {
       case OpCode.OK:
         if (response.data && response.data.gadget_info) {
@@ -139,14 +137,14 @@ export class PlayComponent implements OnInit {
         }
         break;
       case OpCode.DMM_GAME_INSTALL_NEEDED:
-        const installDialog = this.dialog.open(InstallComponent, {
+        const dialog = this.dialog.open(InstallComponent, {
           disableClose: true,
           data: <IRunPayload>{
             app_name: this.name,
             app_base: this.category,
           },
         });
-        installDialog.afterClosed().subscribe((result: IResponseData<IResponseGameFrame> | null) => {
+        dialog.afterClosed().subscribe((result: IResponseData<IResponseGameFrame> | null) => {
           if (result) {
             this.handleResponse(result);
           }
@@ -169,8 +167,8 @@ export class PlayComponent implements OnInit {
               notification: this.notification ? 1 : 0,
               myapp: this.myapp ? 1 : 0,
             };
-            const response = await this.dmm.install(payload);
-            this.handleResponse(response);
+            this.dmm.install(payload)
+              .then(response => this.handleResponse(response));
           }
         });
         break;
@@ -189,13 +187,12 @@ export class PlayComponent implements OnInit {
     }
   }
 
-  public async run() {
+  public run() {
     const payload = {
       app_name: this.name,
       app_base: this.category,
     };
-    const response = await this.dmm.run(payload);
-    this.handleResponse(response);
+    this.dmm.run(payload).then(response => this.handleResponse(response));
   }
   public async attached() {
     const searchParams = this.activatedRoute.snapshot.queryParams;
@@ -231,7 +228,7 @@ export class PlayComponent implements OnInit {
 
   public async requestPayment(payload: IRPCPayload<[IRPCRequestPaymentPayload]>) {
     const transactionUrl = new URL(payload.data[0].transactionUrl);
-    const paymentPayload: IRequestPaymentPayload | IPaymentCancelPayload = {
+    const paymentPayload: IPaymentPayload = {
       app_name: this.name,
       app_base: this.category,
       app_id: this.gadgetInfo.app_id,

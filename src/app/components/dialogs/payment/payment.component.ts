@@ -1,6 +1,5 @@
 import { Component, OnInit, Inject } from '@angular/core';
-import { IResponsePaymentDetail, IRequestPaymentPayload, IPaymentCancelPayload, IResponseData, IResponsePaymentAction, IResponseError } from 'src/app/types/dmm';
-import { Router } from '@angular/router';
+import { IResponsePaymentDetail, IPaymentPayload, IResponseData, IResponsePaymentAction, IResponseError } from 'src/app/types/dmm';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { DmmService } from 'src/app/services/dmm.service';
 
@@ -10,15 +9,13 @@ import { DmmService } from 'src/app/services/dmm.service';
   styleUrls: ['./payment.component.sass', '../dialog.sass'],
 })
 export class PaymentComponent implements OnInit {
-
   public detail: IResponsePaymentDetail;
-  public paymentPayload: IRequestPaymentPayload | IPaymentCancelPayload;
+  public paymentPayload: IPaymentPayload;
   public requesting: boolean = false;
   constructor(
     private dmm: DmmService,
     private dialogRef: MatDialogRef<PaymentComponent>,
-    private router: Router,
-    @Inject(MAT_DIALOG_DATA) public data: [IResponsePaymentDetail, IRequestPaymentPayload | IPaymentCancelPayload],
+    @Inject(MAT_DIALOG_DATA) public data: [IResponsePaymentDetail, IPaymentPayload],
   ) {
     this.detail = this.data[0];
     this.paymentPayload = this.data[1];
