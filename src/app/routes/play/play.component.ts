@@ -4,7 +4,7 @@ import { SettingService } from './../../services/setting.service';
 import { OpCode, IResponseData, IResponseGameFrame, IInstallPayload, IResponseError, IRPCPayloadRaw, IRPCPayload, IRPCRequestPaymentPayload, IPaymentPayload, IResponsePaymentAction } from './../../types/dmm';
 import { Component, OnInit } from '@angular/core';
 import { IGadgetInfo, IRunPayload } from 'src/app/types/dmm';
-import { MatDialog } from '@angular/material';
+import { MatDialog } from '@angular/material/dialog';
 import { InstallComponent } from 'src/app/components/dialogs/install/install.component';
 import { DmmService } from 'src/app/services/dmm.service';
 import { Router, ActivatedRoute } from '@angular/router';
