@@ -35,6 +35,7 @@ import { RegistComponent } from './components/dialogs/regist/regist.component';
 import { SafeResourceUrlPipe } from './pipes/safe-resource-url.pipe';
 import { PaymentComponent } from './components/dialogs/payment/payment.component';
 import { UpdateStComponent } from './components/dialogs/update-st/update-st.component';
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
     declarations: [
@@ -56,6 +57,7 @@ import { UpdateStComponent } from './components/dialogs/update-st/update-st.comp
         AppRoutingModule,
         BrowserAnimationsModule,
         FormsModule,
+        HttpClientModule,
         MatRippleModule,
         MatFormFieldModule,
         MatInputModule,

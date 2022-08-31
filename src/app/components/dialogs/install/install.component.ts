@@ -3,6 +3,7 @@ import { Component, OnInit, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { IInstallPayload, IRunPayload, OpCode } from 'src/app/types/dmm';
 import { Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-install',
@@ -29,7 +30,7 @@ export class InstallComponent implements OnInit {
       notification: this.notification ? 1 : 0,
       myapp: this.myapp ? 1 : 0,
     };
-    const response = await this.dmm.install(payload);
+    const response = await firstValueFrom(this.dmm.install(payload));
     this.requesting = false;
     this.dialogRef.close(response);
   }

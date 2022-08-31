@@ -6,6 +6,7 @@ import { IRegistPayload } from 'src/app/types/dmm';
 import { MAT_DATE_LOCALE, DateAdapter, MAT_DATE_FORMATS } from '@angular/material/core';
 import { MAT_MOMENT_DATE_FORMATS, MomentDateAdapter } from '@angular/material-moment-adapter';
 import * as Moment from 'moment';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-regist',
@@ -79,7 +80,7 @@ export class RegistComponent implements OnInit {
     if (this.isAdultChecked) {
       payload.isAdultChecked = 'on';
     }
-    const response = await this.dmm.regist(payload);
+    const response = await firstValueFrom(this.dmm.regist(payload));
     this.requesting = false;
     this.dialogRef.close(response);
   }

@@ -1,7 +1,7 @@
 import { UpdateStComponent } from './../../components/dialogs/update-st/update-st.component';
 import { PaymentComponent } from './../../components/dialogs/payment/payment.component';
 import { SettingService } from './../../services/setting.service';
-import { OpCode, IResponseData, IResponseGameFrame, IInstallPayload, IResponseError, IRPCPayloadRaw, IRPCPayload, IRPCRequestPaymentPayload, IPaymentPayload, IResponsePaymentAction } from './../../types/dmm';
+import { OpCode, IResponseData, IResponseGameFrame, IInstallPayload, IResponseError, IRPCPayloadRaw, IRPCPayload, IRPCRequestPaymentPayload, IPaymentPayload, IResponsePaymentAction, IResponseMessage } from './../../types/dmm';
 import { Component, OnInit } from '@angular/core';
 import { IGadgetInfo, IRunPayload } from 'src/app/types/dmm';
 import { MatDialog } from '@angular/material/dialog';
@@ -9,6 +9,8 @@ import { InstallComponent } from 'src/app/components/dialogs/install/install.com
 import { DmmService } from 'src/app/services/dmm.service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { RegistComponent } from 'src/app/components/dialogs/regist/regist.component';
+import { BehaviorSubject, firstValueFrom, fromEvent, of, ReplaySubject, Subject } from 'rxjs';
+import { filter, take, takeUntil, tap, map, switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-play',
@@ -27,6 +29,9 @@ export class PlayComponent implements OnInit {
   private notification: boolean = true;
   private myapp: boolean = true;
   private updateStTimer: number = null;
+  private destroyed$ = new ReplaySubject<void>(1);
+  private response$ = new Subject<IResponseData<any> | IResponseMessage>();
+
   private gadgetInfo: IGadgetInfo = {} as IGadgetInfo;
   private rpcToken: string = '';
   private readonly newTransactionHost = 'pc-play.games.dmm.com';
@@ -59,10 +64,18 @@ export class PlayComponent implements OnInit {
     );
   }
 
+  public tryCreateUrl(url: string, fallbackSchema: "http" | "https"): URL {
+    try {
+      return new URL(url);
+    } catch (_) {
+      return new URL(`${fallbackSchema}://${url}`);
+    }
+  }
+
   public handleOsapi(osapi: string) {
     const parser = document.createElement('textarea');
     parser.innerHTML = osapi;
-    const params = new URL(parser.value);
+    const params = this.tryCreateUrl(parser.value, "http");
     if (params.searchParams.has('parent')) {
       params.searchParams.set('parent', `${window.location.origin}${window.location.pathname}`);
     }
@@ -75,14 +88,14 @@ export class PlayComponent implements OnInit {
   }
 
   public updateST = async () => {
-    const result = await this.dmm.updateST({
+    const result = await firstValueFrom(this.dmm.updateST({
       app_name: this.name,
       app_id: this.gadgetInfo.app_id,
       app_base: this.category,
       st: encodeURIComponent(this.gadgetInfo.st),
       time: this.gadgetInfo.time,
       token: this.gadgetInfo.token,
-    });
+    }).pipe(takeUntil(this.destroyed$)));
     if (result.code !== OpCode.OK || result.data.status !== 'ok') {
       clearInterval(this.updateStTimer);
       const dialog = this.dialog.open(UpdateStComponent, {
@@ -145,9 +158,10 @@ export class PlayComponent implements OnInit {
           },
         });
         dialog.afterClosed().subscribe((result: IResponseData<IResponseGameFrame> | null) => {
-          if (result) {
-            this.handleResponse(result);
+          if (!result) {
+            return;
           }
+          this.response$.next(result);
         });
         break;
       case OpCode.DMM_REQUIRE_PROFILE:
@@ -155,22 +169,25 @@ export class PlayComponent implements OnInit {
           disableClose: true,
           data: this.category,
         });
-        registDialog.afterClosed().subscribe(async (result: IResponseData<IResponseGameFrame> | null) => {
-          if (result) {
-            if (result.code !== OpCode.OK) {
-              this.handleResponse(result);
-              return;
-            }
-            const payload: IInstallPayload = {
-              app_name: this.name,
-              app_base: this.category,
-              notification: this.notification ? 1 : 0,
-              myapp: this.myapp ? 1 : 0,
-            };
-            this.dmm.install(payload)
-              .then(response => this.handleResponse(response));
-          }
-        });
+        registDialog.afterClosed()
+          .pipe(
+            filter(result => !!result),
+            switchMap((result: IResponseData<IResponseGameFrame>) => {
+              if (result.code !== OpCode.OK) {
+                return of(result);
+              }
+              const payload: IInstallPayload = {
+                app_name: this.name,
+                app_base: this.category,
+                notification: this.notification ? 1 : 0,
+                myapp: this.myapp ? 1 : 0,
+              };
+              return this.dmm.install(payload);
+            }),
+            take(1),
+            takeUntil(this.destroyed$),
+          )
+          .subscribe((result) => this.response$.next(result));
         break;
       case OpCode.DMM_FORCE_REDIRECT:
       case OpCode.DMM_GAME_ALREADY_INSTALLED:
@@ -192,7 +209,11 @@ export class PlayComponent implements OnInit {
       app_name: this.name,
       app_base: this.category,
     };
-    this.dmm.run(payload).then(response => this.handleResponse(response));
+    this.dmm.run(payload)
+      .pipe(
+        take(1),
+        takeUntil(this.destroyed$)
+      ).subscribe(response => this.handleResponse(response));
   }
   public async attached() {
     const searchParams = this.activatedRoute.snapshot.queryParams;
@@ -235,7 +256,7 @@ export class PlayComponent implements OnInit {
       version: transactionUrl.host === this.newTransactionHost ? 'new' : 'old',
       payment_id: payload.data[0].paymentId,
     };
-    const result = await this.dmm.requestPayment(paymentPayload);
+    const result = await firstValueFrom(this.dmm.requestPayment(paymentPayload).pipe(takeUntil(this.destroyed$)));
     if (result.code !== OpCode.OK) {
       this.rpcMessage('dmm.requestPaymentCallback', 500, result.data);
       return;
@@ -284,14 +305,20 @@ export class PlayComponent implements OnInit {
   }
 
   ngOnInit() {
-    window.addEventListener('message', this.handleMessage);
+    fromEvent(window, 'message')
+      .pipe(
+        takeUntil(this.destroyed$),
+      ).subscribe((e) => this.handleMessage(e as any));
+    this.response$
+      .pipe(
+        takeUntil(this.destroyed$)
+      ).subscribe(response => this.handleResponse(response));
     this.attached();
   }
 
   ngOnDestroy(): void {
-    // Called once, before the instance is destroyed.
-    // Add 'implements OnDestroy' to the class.
-    window.removeEventListener('message', this.handleMessage);
+    this.destroyed$.next();
+    this.destroyed$.complete();
     clearInterval(this.updateStTimer);
   }
 

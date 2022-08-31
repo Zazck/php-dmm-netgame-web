@@ -2,6 +2,7 @@ import { Component, OnInit, Inject } from '@angular/core';
 import { IResponsePaymentDetail, IPaymentPayload, IResponseData, IResponsePaymentAction, IResponseError } from 'src/app/types/dmm';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { DmmService } from 'src/app/services/dmm.service';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-payment',
@@ -28,7 +29,7 @@ export class PaymentComponent implements OnInit {
 
   public async commit() {
     this.requesting = true;
-    const result: IResponseData<IResponsePaymentAction> | IResponseError | null = await this.dmm.paymentCommit(this.paymentPayload).catch(() => {
+    const result: IResponseData<IResponsePaymentAction> | IResponseError | null = await firstValueFrom(this.dmm.paymentCommit(this.paymentPayload)).catch(() => {
       this.requesting = false;
       return null;
     });
@@ -39,7 +40,7 @@ export class PaymentComponent implements OnInit {
 
   public async cancel() {
     this.requesting = true;
-    const result: IResponseData<IResponsePaymentAction> | IResponseError | null = await this.dmm.paymentCancel(this.paymentPayload).catch(() => {
+    const result: IResponseData<IResponsePaymentAction> | IResponseError | null = await firstValueFrom(this.dmm.paymentCancel(this.paymentPayload)).catch(() => {
       this.requesting = false;
       return null;
     });

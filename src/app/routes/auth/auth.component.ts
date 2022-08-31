@@ -3,6 +3,7 @@ import { SettingService } from './../../services/setting.service';
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { OpCode } from 'src/app/types/dmm';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-auth',
@@ -31,7 +32,7 @@ export class AuthComponent implements OnInit {
 
   public async login() {
     this.requesting = true;
-    const result = await this.dmm.login(
+    const result = await firstValueFrom(this.dmm.login(
       {
         login_id: this.loginPayload.loginID,
         password: this.loginPayload.password,
@@ -40,7 +41,7 @@ export class AuthComponent implements OnInit {
         save_password: this.loginPayload.savePassword ? 1 : 0,
       },
       this.category === 1,
-    );
+    ));
     this.requesting = false;
     if (result.code === OpCode.OK) {
       this.router.navigate(['/game-list']);
@@ -48,7 +49,7 @@ export class AuthComponent implements OnInit {
   }
   public async logout() {
     this.requesting = true;
-    const result = await this.dmm.logout();
+    const result = await firstValueFrom(this.dmm.logout());
     this.requesting = false;
   }
 }
